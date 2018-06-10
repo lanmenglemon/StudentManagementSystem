@@ -1,73 +1,66 @@
 var students = [];
+document.addEventListener('DOMContentLoaded', function() {
+    if(localStorage.a_students) {
+        students = JSON.parse(localStorage.a_students);
+        displayStudents(students, 10);
+    }
+    else {
+        jQuery.ajax({
+            type: 'GET',
+            url: 'http://127.0.0.1:8080/data.json',
+            success: function(data) {
+                students = data;
+                localStorage.a_students = JSON.stringify(students);
+                displayStudents(students, 10);
+            },
+            error: function (err) { 
+                console.log(err);
+             }
+        });
+    }
+});
 
-var locations = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM", "FL",
-                    "GA", "GU", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MH",
-                    "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM",
-                    "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA", "PR", "RI", "SC", "SD",
-                    "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", "WI", "WY"],
-    batches = ["Java", "UI", "Big Data", "Devops", "Mobile", "C#"],
-    employers = ["Facebook", "LinkedIn", "Amazon", "Google", "Apple", "Microsoft"],
-    positions = ["Computer Programmer", "Front end developer", "Full stack engineer", "Software Engineer"];
-    addresses = ["Google, NY", "Google, CA", "Amazon, WA", "Microsoft, WA", "Facebook, NY", "LinkedIn, NY"]
-
-for(var i = 0; i < 20; i++) {
-    var prev_emp_1 = employers[Math.floor(Math.random() * 6)];
-    var prev_emp_2 = employers[Math.floor(Math.random() * 6)];
-
-    var student = {
-        "firstname": "firstName " + (i + 1),
-        "lastname": "lastName " + (i + 1),
-        "email": (i + 1) + "@google.com",
-        "location": [locations[Math.floor(Math.random() * 58)], locations[Math.floor(Math.random() * 58)]],
-        "phone": Math.floor(Math.random() * 9000000000) + 1000000000,
-        "batch": batches[Math.floor(Math.random() * 6)],
-        "address": {
-            "communication": addresses[Math.floor(Math.random() * 6)],
-            "permanent": addresses[Math.floor(Math.random() * 6)]
-        },
-        "previous_employer": {
-            prev_emp_1: positions[Math.floor(Math.random() * 4)],
-            prev_emp_2: positions[Math.floor(Math.random() * 4)]
-        }
-    };
-    students.push(student);
-}
-var str = JSON.stringify(students);
-
-displayStudents(students, 10);
 
 function getNumber(selectedOption) {
     var num = parseInt(selectedOption.value);
+    
     displayStudents(students, num);
 }
-// var list = document.getElementById("list");
-// var optionSelected = list.options[list.selectedIndex].value;
-// console.log(optionSelected);
+
+function clearTable() {
+    $("#table").find("tr:gt(0)").remove();
+}
 
 function displayStudents(students, num) {
+    clearTable();
     var leng = students.length;
+    var rowNum = leng;
     if (num == 10 && leng >= 10) {
-        leng = 10;
+        rowNum = 10;
     }
     if (num == 20 && leng >= 20) {
-        leng = 20;
+        rowNum = 20;
     }
     if (num == 50 && leng >= 50) {
-        leng = 50;
+        rowNum = 50;
     }
     if (num == 100 && leng >= 100) {
-        leng = 100;
+        rowNum = 100;
     }
-    for (var i = 0; i < leng; i++) {
+    var show = 0;
+    for (var i = 0; i < rowNum; i++) {
         var student = `
-                        <tr>
+                        <tr id="tr_${i}">
                             <td>${students[i].firstname}</td>
                             <td>${students[i].lastname}</td>
                             <td>${students[i].email}</td>
                             <td>${students[i].location}</td>
                             <td>${students[i].phone}</td>
                             <td>${students[i].batch}</td>
-                            <td>${students[i].address.communication}</td>
+                            <td>
+                                ${students[i].address.communication}<br />
+                                ${students[i].address.permanent}
+                            </td>
                             <td>
                                 <input type="button" value="Show more details" id="btn_details_${i}" />
                                 <input type="button" value="Edit" id="btn_edit_${i}" />
@@ -78,45 +71,159 @@ function displayStudents(students, num) {
         document.getElementsByTagName('tr')[document.getElementsByTagName('tr').length - 1].insertAdjacentHTML('afterend', student);
     }
 }
+
+function addWarningMsg(id) {
+    var warning = id + '_warning';
+    if(!document.getElementById(warning) && !document.getElementById(id).value) {
+        document.getElementById(id).insertAdjacentHTML('afterend', `<span style="color:red" id="${warning}">Please enter!</span>`);
+    }
+    if(document.getElementById(id).value && document.getElementById(warning)) {
+        document.getElementById(warning).remove();
+    }
+}
+
 document.getElementById('btn').addEventListener('click', function() {
     if (document.getElementById('fname').value && document.getElementById('lname').value 
         && document.getElementById('email').value && document.getElementById('loc').value 
         && document.getElementById('phone').value && document.getElementById('batch').value
-        && document.getElementById('addr').value) {
-        var student = {
+        && document.getElementById('comm_addr').value && document.getElementById('perm_addr').value) {
+            var loc = document.getElementById('loc').value;
+            if (loc.includes(",")) {
+                loc = loc.split(",");
+            }
+            var address = {
+                'communication': document.getElementById('comm_addr').value,
+                'permanent': document.getElementById('perm_addr').value
+            };
+            var previous_employer = {
+                'prev_emp_1': document.getElementById('prev_emp_1').value? document.getElementById('prev_emp_1').value:'N/A',
+                'prev_emp_2': document.getElementById('prev_emp_2').value? document.getElementById('prev_emp_2').value:'N/A'
+            };
+            var student = {
             'firstname': document.getElementById('fname').value,
             'lastname': document.getElementById('lname').value,
             'email': document.getElementById('email').value,
-            'location': document.getElementById('loc').value,
+            'location': loc,
             'phone': document.getElementById('phone').value,
             'batch': document.getElementById('batch').value,
-            'address': document.getElementById('addr').value,
-            'previous_employer': document.getElementById('prev_emp').value
+            'address': address,
+            'previous_employer': previous_employer
         };
         students.push(student);
+        displayStudents(students, parseInt(jQuery('#list option:selected').text()));
         localStorage.a_students = JSON.stringify(students);
     }
     else {
-        if(!document.getElementById('fname_warning')) {
-            document.getElementById('fname').insertAdjacentHTML('afterend', '<span style="color:red" id="fname_warning">Please enter your firstname!</span>');
-        }
-        if(!document.getElementById('lname_warning')) {
-            document.getElementById('lname').insertAdjacentHTML('afterend', '<span style="color:red" id="lname_warning">Please enter your lastname!</span>');
-        }
-        if(!document.getElementById('email_warning')) {
-            document.getElementById('email').insertAdjacentHTML('afterend', '<span style="color:red" id="email_warning">Please enter your email!</span>');
-        }
-        if(!document.getElementById('loc_warning')) {
-            document.getElementById('loc').insertAdjacentHTML('afterend', '<span style="color:red" id="loc_warning">Please enter your location!</span>');
-        }
-        if(!document.getElementById('phone_warning')) {
-            document.getElementById('phone').insertAdjacentHTML('afterend', '<span style="color:red" id="phone_warning">Please enter your phone!</span>');
-        }
-        if(!document.getElementById('batch_warning')) {
-            document.getElementById('batch').insertAdjacentHTML('afterend', '<span style="color:red" id="batch_warning">Please enter your batch!</span>');
-        }
-        if(!document.getElementById('addr_warning')) {
-            document.getElementById('addr').insertAdjacentHTML('afterend', '<span style="color:red" id="batch_warning">Please enter your address!</span>');
-        }
+        addWarningMsg('fname');
+        addWarningMsg('lname');
+        addWarningMsg('email');
+        addWarningMsg('loc');
+        addWarningMsg('phone');
+        addWarningMsg('batch');
+        addWarningMsg('comm_addr');
+        addWarningMsg('perm_addr');
     }
+});
+
+jQuery(document).on('click', 'input[id^="btn_details_"]', function() {
+    var id = jQuery(this).attr('id').slice(12);
+        tr_id = jQuery(this).attr('id').replace('btn_details_', 'tr_'),
+        tr_id_details = tr_id + "_details";
+    if(jQuery('#' + tr_id_details).length != 0 ) {
+        jQuery('#' + tr_id_details).remove();
+        console.log(tr_id_details + " removed");
+    }
+    else {
+        var student = students[id];
+        jQuery('#' + tr_id).after(`
+            <tr id="${tr_id}_details">
+                <td colspan="8">
+                    Previous Employer(s): ${student.previous_employer.prev_emp_1}, ${student.previous_employer.prev_emp_2}
+                </td>
+            </tr>
+        `);
+        console.log(tr_id_details + " added");
+    }
+});
+jQuery(document).on('click', 'input[id^="btn_edit_"]', function() {
+    var id = jQuery(this).attr('id').slice(9);
+        tr_id = jQuery(this).attr('id').replace('btn_edit_', 'tr_'),
+        tr_id_edit = tr_id + "_edit";
+    if(jQuery('#' + tr_id_edit).length != 0 ) {
+        jQuery('#' + tr_id_edit).remove();
+        console.log(tr_id_edit + " removed");
+    }
+    else {
+        var student = students[id];
+        jQuery('#' + tr_id).after(`
+            <tr id="${tr_id_edit}">
+                <td colspan="8">
+                    <input type="text" placeholder="Firstname" id="fname_${id}" />
+                    <input type="text" placeholder="Lastname" id="lname_${id}" />
+                    <input type="text" placeholder="Email" id="email_${id}" />
+                    <input type="text" placeholder="Location" id="loc_${id}" />
+                    <input type="text" placeholder="Phone" id="phone_${id}" />
+                    <input type="text" placeholder="Batch" id="batch_${id}" />
+                    <input type="text" placeholder="Communication Address" id="comm_addr_${id}" />
+                    <input type="text" placeholder="Permanent Address" id="perm_addr_${id}" />
+                    <input type="text" placeholder="Previous employer(optional)" id="prev_emp_1_${id}" />
+                    <input type="text" placeholder="Previous employer(optional)" id="prev_emp_2_${id}" />
+                    <div>
+                        <input type="button" value="Save" id="btn_save_${id}" />
+                    </div>
+                </td>
+            </tr>
+        `);
+        console.log(tr_id_edit + " added");
+    }
+});
+
+jQuery(document).on('click', 'input[id^="btn_delete_"]', function() {
+    var tr_id = jQuery(this).attr('id').replace('btn_delete_', 'tr_');
+    students.splice(jQuery(this).attr('id').slice(11), 1);
+    displayStudents(students, parseInt(jQuery('#list option:selected').text()));
+    localStorage.a_students = JSON.stringify(students);
+    console.log(tr_id + " removed");
+});
+
+jQuery(document).on('click', 'input[id^="btn_save_"]', function() {
+    var id = jQuery(this).attr('id').slice(9);
+    tr_id = jQuery(this).attr('id').replace('btn_save_', 'tr_');
+    var student = students[id];
+    if (jQuery("#fname_" + id)[0].value) {
+        student.firstname = jQuery("#fname_" + id)[0].value;
+    }
+    if (jQuery("#lname_" + id)[0].value) {
+        student.lastname = jQuery("#lname_" + id)[0].value;
+    }
+    if (jQuery("#email_" + id)[0].value) {
+        student.email = jQuery("#email_" + id)[0].value;
+    }
+    if (jQuery("#loc_" + id)[0].value) {
+        var loc = jQuery("#loc_" + id)[0].value;
+        if (loc.includes(",")) {
+            loc = loc.split(",");
+        }
+        student.location = loc;
+    }
+    if (jQuery("#phone_" + id)[0].value) {
+        student.phone = jQuery("#phone_" + id)[0].value;
+    }
+    if (jQuery("#batch_" + id)[0].value) {
+        student.batch = jQuery("#batch_" + id)[0].value;
+    }
+    if (jQuery("#comm_addr_" + id)[0].value) {
+        student.address.communication = jQuery("#comm_addr_" + id)[0].value;
+    }
+    if (jQuery("#perm_addr_" + id)[0].value) {
+        student.address.permanent = jQuery("#perm_addr_" + id)[0].value;
+    }
+    if (jQuery("#prev_emp_1_" + id)[0].value) {
+        student.previous_employer.prev_emp_1 = jQuery("#prev_emp_1_" + id)[0].value;
+    }
+    if (jQuery("#prev_emp_2_" + id)[0].value) {
+        student.previous_employer.prev_emp_2 = jQuery("#prev_emp_2_" + id)[0].value;
+    }
+    displayStudents(students, parseInt(jQuery('#list option:selected').text()));
+    localStorage.a_students = JSON.stringify(students);
 });

@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Student Management System</title>
+
     </head>
     <body>
         <div>
@@ -23,10 +24,12 @@
             <input type="text" placeholder="Batch" id="batch" />
         </div>
         <div>
-            <input type="text" placeholder="Address" id="addr" />
+            <input type="text" placeholder="Communication Address" id="comm_addr" />
+            <input type="text" placeholder="Permanent Address" id="perm_addr" />
         </div>
         <div>
-            <input type="text" placeholder="Previous employer" id="prev_emp" />
+            <input type="text" placeholder="Previous employer(optional)" id="prev_emp_1" />
+            <input type="text" placeholder="Previous employer(optional)" id="prev_emp_2" />
         </div>
 
         <div>
@@ -39,7 +42,7 @@
             <option value="50" name="recordsShown">50</option>
             <option value="100" name="recordsShown">100</option>
         </select>
-        <table border="1" style="border-collapse:collapse">
+        <table border="1" style="border-collapse:collapse" id="table">
             <tr>
                 <th>Firstname</th>
                 <th>Lastname</th>

@@ -10,14 +10,14 @@ var locations = ["AL", "AK", "AS", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FM
     positions = ["Computer Programmer", "Front end developer", "Full stack engineer", "Software Engineer"];
     addresses = ["Google, NY", "Google, CA", "Amazon, WA", "Microsoft, WA", "Facebook, NY", "LinkedIn, NY"]
 
-for(var i = 0; i < 5; i++) {
+for(var i = 0; i < 100; i++) {
     var prev_emp_1 = employers[Math.floor(Math.random() * 6)];
     var prev_emp_2 = employers[Math.floor(Math.random() * 6)];
 
     var student = {
-        "firstname": "firstName " + i,
-        "lastname": "lastName " + i,
-        "email": i + "@google.com",
+        "firstname": "firstName " + (i + 1),
+        "lastname": "lastName " + (i + 1),
+        "email": (i + 1) + "@google.com",
         "location": [locations[Math.floor(Math.random() * 58)], locations[Math.floor(Math.random() * 58)]],
         "phone": Math.floor(Math.random() * 9000000000) + 1000000000,
         "batch": batches[Math.floor(Math.random() * 6)],
@@ -32,7 +32,11 @@ for(var i = 0; i < 5; i++) {
     };
     students.push(student);
 }
+var data = JSON.stringify(students);
 
-var str = JSON.stringify(students);
+var fs = require('fs');
 
-console.log(str);
+fs.writeFile('data.json', data, (err) => {  
+    if (err) throw err;
+    console.log('Data written to file');
+});
