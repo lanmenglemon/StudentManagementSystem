@@ -257,8 +257,10 @@ document.getElementById('search_btn').addEventListener('click', function () {
     var key = document.getElementById('search').value;
     var list = [];
     for (var i = 0; i < students.length; i++) {
-        if (students[i].firstname.includes(key) || students[i].lastname.includes(key) ||
-            students[i].location.includes(key) || students[i].batch.includes(key) || 
+        if (students[i].firstname.toLowerCase().includes(key.toLowerCase()) || 
+            students[i].lastname.toLowerCase().includes(key.toLowerCase()) ||
+            JSON.stringify(students[i].location).toLowerCase().includes(key.toLowerCase()) || 
+            students[i].batch.toLowerCase().includes(key.toLowerCase()) || 
             students[i].phone.toString().includes(key)) {
             list.push(students[i]);
         }
@@ -319,6 +321,5 @@ var scrollFn = function() {
         }
     }
  };
-
 
  window.addEventListener('scroll', scrollFn);
