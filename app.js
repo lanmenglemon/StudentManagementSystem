@@ -265,3 +265,60 @@ document.getElementById('search_btn').addEventListener('click', function () {
     };
     displayResults(list);
 });
+
+function appendMoreStudents(students, id, num) {
+    var leng = students.length - id - 1;
+    var rowNum = leng;
+    if (num == 10 && leng >= 10) {
+        rowNum = 10;
+    }
+    if (num == 20 && leng >= 20) {
+        rowNum = 20;
+    }
+    if (num == 50 && leng >= 50) {
+        rowNum = 50;
+    }
+    if (num == 100 && leng >= 100) {
+        rowNum = 100;
+    }
+    for (var i = id + 1; i < rowNum + id + 1; i++) {
+        var student = `
+                        <tr id="tr_${i}">
+                            <td>${students[i].firstname}</td>
+                            <td>${students[i].lastname}</td>
+                            <td>${students[i].email}</td>
+                            <td>${students[i].location}</td>
+                            <td>${students[i].phone}</td>
+                            <td>${students[i].batch}</td>
+                            <td>
+                                ${students[i].address.communication}<br />
+                                ${students[i].address.permanent}
+                            </td>
+                            <td>
+                                <input type="button" value="Show more details" id="btn_details_${i}" />
+                                <input type="button" value="Edit" id="btn_edit_${i}" />
+                                <input type="button" value="Delete" id="btn_delete_${i}" />
+                            </td>
+                        </tr>
+                    `;
+        document.getElementsByTagName('tr')[document.getElementsByTagName('tr').length - 1].insertAdjacentHTML('afterend', student);
+    }
+    console.log("Appended");
+}
+
+var scrollFn = function() {
+    if($(window).scrollTop() + $(window).height() == $(document).height()) {
+        var id = parseInt(jQuery("tr:last").attr('id').slice(3));
+        if (id + 1 == students.length) {
+            window.removeEventListener('scroll', scrollFn);
+            jQuery("table").after("No more records");
+        }
+        else {
+            var num = parseInt(jQuery('#list option:selected').text());
+            appendMoreStudents(students, id, num);
+        }
+    }
+ };
+
+
+ window.addEventListener('scroll', scrollFn);
