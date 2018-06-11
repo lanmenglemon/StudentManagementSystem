@@ -47,7 +47,6 @@ function displayStudents(students, num) {
     if (num == 100 && leng >= 100) {
         rowNum = 100;
     }
-    var show = 0;
     for (var i = 0; i < rowNum; i++) {
         var student = `
                         <tr id="tr_${i}">
@@ -226,4 +225,43 @@ jQuery(document).on('click', 'input[id^="btn_save_"]', function() {
     }
     displayStudents(students, parseInt(jQuery('#list option:selected').text()));
     localStorage.a_students = JSON.stringify(students);
+});
+
+function displayResults(students) {
+    clearTable();
+    for (var i = 0; i < students.length; i++) {
+        var student = `
+                        <tr id="tr_${i}">
+                            <td>${students[i].firstname}</td>
+                            <td>${students[i].lastname}</td>
+                            <td>${students[i].email}</td>
+                            <td>${students[i].location}</td>
+                            <td>${students[i].phone}</td>
+                            <td>${students[i].batch}</td>
+                            <td>
+                                ${students[i].address.communication}<br />
+                                ${students[i].address.permanent}
+                            </td>
+                            <td>
+                                <input type="button" value="Show more details" id="btn_details_${i}" />
+                                <input type="button" value="Edit" id="btn_edit_${i}" />
+                                <input type="button" value="Delete" id="btn_delete_${i}" />
+                            </td>
+                        </tr>
+                    `;
+        document.getElementsByTagName('tr')[document.getElementsByTagName('tr').length - 1].insertAdjacentHTML('afterend', student);
+    }
+}
+
+document.getElementById('search_btn').addEventListener('click', function () {
+    var key = document.getElementById('search').value;
+    var list = [];
+    for (var i = 0; i < students.length; i++) {
+        if (students[i].firstname.includes(key) || students[i].lastname.includes(key) ||
+            students[i].location.includes(key) || students[i].batch.includes(key) || 
+            students[i].phone.toString().includes(key)) {
+            list.push(students[i]);
+        }
+    };
+    displayResults(list);
 });
